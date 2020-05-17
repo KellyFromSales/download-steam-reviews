@@ -14,6 +14,7 @@ import datetime
 import json
 import pathlib
 import time
+import pandas as pd
 
 import requests
 
@@ -122,7 +123,7 @@ def get_steam_api_rate_limits():
 
 
 def get_output_filename(app_id):
-    return get_data_path() + 'review_' + str(app_id) + '.json'
+    return get_data_path() + time.strftime('%Y%m%d') + '_review_' + str(app_id) + '.json'
 
 
 def get_dummy_query_summary():
@@ -318,6 +319,23 @@ def download_reviews_for_app_id(app_id,
 
     with open(get_output_filename(app_id), 'w') as f:
         f.write(json.dumps(review_dict) + '\n')
+
+    with open(get_output_filename(app_id),"r") as f:
+    # reading in json file
+        d = json.load(f)
+
+    for id in d['reviews']:
+    # pulls nested author information into main dictionary
+        for key, val in d['reviews'][id]['author'].items():
+            d['reviews'][id][key] = val
+        del d['reviews'][id]['author']
+
+    df = pd.DataFrame.from_dict(d['reviews'], orient='index')
+
+    for col in ['timestamp_created','timestamp_updated','last_played']:
+        df[col] = pd.to_datetime(df[col],unit='s')
+
+    df.to_excel((get_data_path() + time.strftime('%Y%m%d') + '_review_' + str(app_id) + '.xlsx'), index = False)
 
     return review_dict, query_count
 
