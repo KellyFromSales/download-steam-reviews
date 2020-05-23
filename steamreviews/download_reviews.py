@@ -93,10 +93,10 @@ def get_default_request_parameters(chosen_request_params=None):
     return default_request_parameters
 
 
-def get_data_path():
+def get_data_path(app_id):
     # Objective: return the path to the directory where reviews are stored.
 
-    data_path = 'data/'
+    data_path = 'data/'+ str(app_id) + '/'
 
     # Reference of the following line: https://stackoverflow.com/a/14364249
     pathlib.Path(data_path).mkdir(parents=True, exist_ok=True)
@@ -123,7 +123,7 @@ def get_steam_api_rate_limits():
 
 
 def get_output_filename(app_id):
-    return get_data_path() + time.strftime('%Y%m%d') + '_review_' + str(app_id) + '.json'
+    return get_data_path(app_id) +  time.strftime('%Y%m%d') + '_review_' + str(app_id) + '.json'
 
 
 def get_dummy_query_summary():
@@ -335,7 +335,7 @@ def download_reviews_for_app_id(app_id,
     for col in ['timestamp_created','timestamp_updated','last_played']:
         df[col] = pd.to_datetime(df[col],unit='s')
 
-    df.to_excel((get_data_path() + time.strftime('%Y%m%d') + '_review_' + str(app_id) + '.xlsx'), index = False)
+    df.to_excel((get_data_path(app_id) + str(app_id) + '_review_' + time.strftime('%Y%m%d')  + '.xlsx'), index = False)
 
     return review_dict, query_count
 
